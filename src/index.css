@@ -321,3 +321,31 @@ input[type='range'] { width: 100%; accent-color: var(--fil); }
 }
 .message { background: #e3eedd; color: #2f5a2f; padding: 12px 14px; border-radius: 12px; font-weight: 600; }
 .message.erreur { background: #f8e1d9; color: var(--fil-fonce); }
+
+/* ---------- photos & avis ---------- */
+.photo-modele { margin: 0 0 12px; border-radius: var(--rayon); overflow: hidden; background: var(--carte); box-shadow: var(--ombre); }
+.photo-modele img { display: block; width: 100%; max-height: 420px; object-fit: contain; background: #fff; }
+.photo-modele figcaption { font-size: 0.8rem; color: var(--encre-3); padding: 4px 12px 6px; display: flex; align-items: center; gap: 4px; }
+.chargement-photo { height: 220px; background: linear-gradient(90deg, var(--papier-2), var(--carte), var(--papier-2)); background-size: 200% 100%; animation: reflet 1.2s infinite linear; }
+@keyframes reflet { to { background-position: -200% 0; } }
+.photo-absente {
+  width: 100%; display: grid; justify-items: center; gap: 2px; padding: 18px; margin-bottom: 12px;
+  border: 2px dashed var(--trait); border-radius: var(--rayon); background: none; color: var(--encre-2); font-weight: 600;
+}
+.photo-absente .icone { color: var(--fil); }
+.photo-absente small { font-weight: 400; color: var(--encre-3); }
+.etoiles { display: inline-flex; gap: 2px; color: var(--trait); font-size: 1.6rem; line-height: 1; }
+.etoiles button { border: none; background: none; padding: 2px; font-size: inherit; color: inherit; min-width: 36px; min-height: 36px; }
+.etoiles .pleine { color: var(--alerte); }
+.etoiles i { font-style: normal; }
+.note-mini { color: var(--alerte); font-size: 0.8rem; letter-spacing: -1px; }
+.avis-ligne { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.galerie { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0; }
+.galerie img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; }
+.vignette-suppr { position: relative; }
+.vignette-suppr button { position: absolute; top: 4px; right: 4px; width: 28px; height: 28px; border-radius: 50%; border: none; background: rgb(0 0 0 / 0.6); color: #fff; font-size: 1.1rem; }
+.zone-photo.mini { height: auto; aspect-ratio: 1; }
+.grille-liens { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.lien-carte { display: grid; gap: 2px; text-align: left; padding: 12px; border: 1.5px solid var(--trait); border-radius: 12px; background: #fff; }
+.lien-carte small { color: var(--encre-3); font-size: 0.8rem; }
+.carte-vignette { background: #fff; }

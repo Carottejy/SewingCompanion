@@ -14,6 +14,8 @@ Application Android (APK) pour gérer ses projets de couture et puiser dans un c
   moderne, vintage, édouardien, victorien, Régence, XVIIIᵉ, Renaissance, médiéval, viking, costumes du monde.
   Chaque patron indique difficulté (1 à 5), temps de travail estimé, métrage de tissu et tissus conseillés,
   avec un lien vers la page de l'éditeur. Recherche, filtres (type, difficulté, gratuits, favoris) et tri.
+- **Photos du modèle** : l'image d'aperçu publiée par l'éditeur sur la fiche du patron (quand le lien pointe vers une fiche précise), sinon un bouton de recherche d'images.
+- **Avis** : mon avis (note, « cousu », taille, commentaire, photos de ma réalisation) et liens vers les avis de la communauté (PatternReview, blogs, YouTube, Pinterest).
 - **Mes patrons** : ajout de ses propres patrons (photo, métrage, temps, lien, notes).
 - **Sauvegarde / restauration** en fichier JSON. Les données restent sur le téléphone.
 - Fonctionne hors ligne. Le catalogue peut être mis à jour depuis l'app (il est lu dans ce dépôt).
@@ -39,7 +41,7 @@ Stack : React 19 + TypeScript + Vite, Capacitor 8 (Android), stockage IndexedDB.
 
 ### Enrichir le catalogue
 
-Le catalogue est dans `src/data/catalogue.json` (champ `misAJour` à incrémenter). Après un push,
+Le catalogue est généré par `scripts/gen_catalogue.py` vers `src/data/catalogue.json` (champ `misAJour` à incrémenter). Après un push,
 le bouton « Chercher une mise à jour du catalogue » des réglages récupère la nouvelle version sans réinstaller l'APK.
 
 ### Signature

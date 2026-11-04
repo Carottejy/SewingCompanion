@@ -1,13 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { get, set } from 'idb-keyval'
 import catalogueEmbarque from './data/catalogue.json'
-import type { AppState, CatalogueFichier, Patron, Projet } from './types'
+import type { AppState, Avis, CatalogueFichier, Patron, Projet } from './types'
 
 const CLE = 'sewing-companion-state-v1'
 export const URL_CATALOGUE =
   'https://raw.githubusercontent.com/Carottejy/SewingCompanion/main/src/data/catalogue.json'
 
-const VIDE: AppState = { projets: [], patronsPerso: [], favoris: [] }
+const VIDE: AppState = { projets: [], patronsPerso: [], favoris: [], avis: {} }
 
 interface Store {
   pret: boolean
@@ -20,6 +20,7 @@ interface Store {
   majPatronPerso: (p: Patron) => void
   supprimerPatronPerso: (id: string) => void
   basculerFavori: (id: string) => void
+  majAvis: (id: string, a: Avis | null) => void
   remplacerTout: (s: AppState) => void
   definirCatalogueDistant: (c: CatalogueFichier) => void
 }
@@ -102,6 +103,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         ...s,
         favoris: s.favoris.includes(id) ? s.favoris.filter((f) => f !== id) : [...s.favoris, id],
       })),
+    majAvis: (id, a) =>
+      setState((s) => {
+        const avis = { ...s.avis }
+        if (a) avis[id] = a
+        else delete avis[id]
+        return { ...s, avis }
+      }),
     remplacerTout: (s) => setState({ ...VIDE, ...s }),
     definirCatalogueDistant: (c) => setState((s) => ({ ...s, catalogueDistant: c })),
   }

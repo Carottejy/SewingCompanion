@@ -47,6 +47,8 @@ export interface Patron {
   perso?: boolean
   notes?: string
   image?: string
+  /** URL directe d'une photo du modèle (facultatif) */
+  photo?: string
 }
 
 export type StatutProjet = 'idee' | 'en_cours' | 'pause' | 'termine'
@@ -89,9 +91,20 @@ export interface CatalogueFichier {
   patrons: Patron[]
 }
 
+/** Mon avis personnel sur un patron (catalogue ou perso) */
+export interface Avis {
+  note?: number // 1 à 5
+  cousu: boolean
+  taille?: string
+  commentaire?: string
+  photos: string[] // mes réalisations (data URL compressées)
+  date: string
+}
+
 export interface AppState {
   projets: Projet[]
   patronsPerso: Patron[]
   favoris: string[]
+  avis: Record<string, Avis>
   catalogueDistant?: CatalogueFichier
 }

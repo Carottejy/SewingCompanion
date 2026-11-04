@@ -41,6 +41,7 @@ export default function Reglages() {
         projets: d.projets,
         patronsPerso: d.patronsPerso ?? [],
         favoris: d.favoris ?? [],
+        avis: d.avis ?? {},
         catalogueDistant: state.catalogueDistant,
       })
       setMsg('Sauvegarde restaurée.')

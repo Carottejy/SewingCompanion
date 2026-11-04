@@ -3,6 +3,7 @@ import { useStore } from '../store'
 import { BadgeEpoque, Difficulte, Entete, Feuille, Icone, Vide, useNav } from '../ui'
 import { epoque, fmtH, fmtM, plage, PUBLICS, typeLabel, uid } from '../lib'
 import { lienRecherche, ouvrirLien } from '../native'
+import { AvisEnLigne, MonAvis, PhotoModele } from './Avis'
 
 export default function PatronDetail({ id }: { id: string }) {
   const { trouverPatron, state, basculerFavori, majProjet, supprimerPatronPerso } = useStore()
@@ -40,7 +41,7 @@ export default function PatronDetail({ id }: { id: string }) {
           </>
         }
       />
-      {p.image && <img className="detail-image" src={p.image} alt={`Photo du patron ${p.nom}`} />}
+      <PhotoModele key={p.id + (p.image ? 'i' : '')} p={p} />
       <div className="detail-tete">
         <BadgeEpoque p={p} />
         <h1 className="detail-titre">{p.nom}</h1>
@@ -117,6 +118,9 @@ export default function PatronDetail({ id }: { id: string }) {
           </button>
         )}
       </div>
+
+      <MonAvis p={p} />
+      {!p.perso && <AvisEnLigne p={p} />}
 
       {utilisations.length > 0 && (
         <section className="bloc">

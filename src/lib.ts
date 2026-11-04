@@ -68,7 +68,7 @@ export function joursRestants(date: string): number {
 }
 
 export function formatDate(date: string): string {
-  const [y, m, d] = date.split('-').map(Number)
+  const [y, m, d] = date.slice(0, 10).split('-').map(Number)
   return new Date(y, m - 1, d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 

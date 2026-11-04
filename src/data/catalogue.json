@@ -1,6 +1,6 @@
 {
  "version": 1,
- "misAJour": "2026-11-04",
+ "misAJour": "2026-11-04T11:40",
  "patrons": [
   {
    "id": "dd-myosotis",
@@ -231,8 +231,8 @@
    "tissuMin": 1.6,
    "tissuMax": 2.0,
    "tissus": "Denim stretch 2 % élasthanne",
-   "description": "Jean ajusté taille haute ou basse avec surpiqûres, braguette zippée et poches rivetées. Le classique du jean fait main.",
-   "url": "https://closetcorepatterns.com",
+   "description": "Jean ajusté (taille haute, basse ou mi-haute) avec surpiqûres, braguette zippée et poches rivetées. Le classique du jean fait main.",
+   "url": "https://closetcorepatterns.com/products/ginger-mid-rise-jeans-pattern",
    "gratuit": false,
    "sourceMetrage": "estimation"
   },
@@ -250,7 +250,7 @@
    "tissuMax": 2.0,
    "tissus": "Gabardine stretch, sergé, laine",
    "description": "Pantalon droit tailleur avec poches passepoilées, braguette et ceinture montée.",
-   "url": "https://closetcorepatterns.com",
+   "url": "https://closetcorepatterns.com/products/sasha-trousers-pattern",
    "gratuit": false,
    "sourceMetrage": "estimation"
   },
@@ -394,7 +394,7 @@
    "tissuMax": 2.8,
    "tissus": "Chambray, lin, popeline",
    "description": "Robe-chemise sans manches, avec ou sans volant froncé.",
-   "url": "https://grainlinestudio.com",
+   "url": "https://grainlinestudio.com/collections/alder",
    "gratuit": false,
    "sourceMetrage": "estimation"
   },
@@ -574,7 +574,7 @@
    "tissuMax": 2.8,
    "tissus": "Lin, coton, viscose",
    "description": "Robe facile à enfiler. Patron libre de prix (« payez ce que vous voulez »).",
-   "url": "https://peppermintmag.com/sewing-school/",
+   "url": "https://peppermintmag.com/sewing-school/everyday-dress/",
    "gratuit": true,
    "sourceMetrage": "estimation"
   },
@@ -592,7 +592,7 @@
    "tissuMax": 2.0,
    "tissus": "Lin, coton, sergé léger",
    "description": "Jupe midi froncée à grandes poches plaquées. Libre de prix.",
-   "url": "https://peppermintmag.com/sewing-school/",
+   "url": "https://peppermintmag.com/sewing-school/pocket-skirt/",
    "gratuit": true,
    "sourceMetrage": "estimation"
   },
@@ -610,7 +610,7 @@
    "tissuMax": 2.6,
    "tissus": "Lin, coton matelassé, viscose",
    "description": "Veste-peignoir mi-saison polyvalente. Libre de prix.",
-   "url": "https://peppermintmag.com/sewing-school/",
+   "url": "https://peppermintmag.com/sewing-school/robe-jacket/",
    "gratuit": true,
    "sourceMetrage": "estimation"
   },
@@ -1164,7 +1164,7 @@
    "tissuMax": 2.6,
    "tissus": "Batiste, linon, mousseline, soie",
    "description": "Blouse ample à col montant de la « Gibson Girl », avec options d'entre-deux en dentelle.",
-   "url": "https://www.folkwear.com/collections/all",
+   "url": "https://www.folkwear.com/products/205-gibson-girl-blouse",
    "gratuit": false,
    "sourceMetrage": "estimation"
   },
@@ -2475,7 +2475,7 @@
    "tissuMax": 4.5,
    "tissus": "Laine, lin pour la doublure",
    "description": "Kirtle du XVe siècle avec manches séparées.",
-   "url": "https://reconstructinghistory.com/collections/medieval-patterns",
+   "url": "https://reconstructinghistory.com/products/rh002-15th-century-womens-kirtle-sleeves",
    "gratuit": false,
    "sourceMetrage": "estimation"
   },

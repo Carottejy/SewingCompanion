@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { DIFFICULTES, epoque, fmtH, fmtM, plage, typeLabel } from './lib'
-import type { Patron } from './types'
+import type { Avis, Patron } from './types'
+import { photoEnCache } from './apercu'
 
 /* ---------- navigation ---------- */
 export type Onglet = 'projets' | 'catalogue' | 'mesPatrons' | 'reglages'
@@ -64,16 +65,19 @@ export function BadgeEpoque({ p }: { p: Pick<Patron, 'epoque' | 'periode'> }) {
   )
 }
 
-export function CartePatron({ p, onClick, favori }: { p: Patron; onClick: () => void; favori?: boolean }) {
+export function CartePatron({ p, onClick, favori, avis }: { p: Patron; onClick: () => void; favori?: boolean; avis?: Avis }) {
+  const vignette = p.image ?? photoEnCache(p)
   return (
     <button className="carte-patron" onClick={onClick} style={{ ['--c' as string]: epoque(p.epoque).couleur }}>
-      {p.image ? <img src={p.image} alt="" className="carte-vignette" /> : <span className="carte-liseret" />}
+      {vignette ? <img src={vignette} alt="" className="carte-vignette" loading="lazy" referrerPolicy="no-referrer" /> : <span className="carte-liseret" />}
       <span className="carte-corps">
         <span className="carte-haut">
           <BadgeEpoque p={p} />
           {p.gratuit && <span className="pastille gratuit">Gratuit</span>}
           {p.perso && <span className="pastille perso">Mon patron</span>}
           {favori && <Icone n="etoile-pleine" petite />}
+          {avis?.cousu && <span className="pastille gratuit">Cousu ✓</span>}
+          {avis?.note ? <span className="note-mini">{'★'.repeat(avis.note)}</span> : null}
         </span>
         <strong className="carte-nom">{p.nom}</strong>
         <span className="carte-marque">

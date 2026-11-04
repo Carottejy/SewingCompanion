@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { prechargerCache } from '../apercu'
 import { useStore } from '../store'
 import { CartePatron, Entete, Icone, Vide, useNav } from '../ui'
 import { correspond, DIFFICULTES, EPOQUES, moyenneHeures, TYPES } from '../lib'
 import type { Epoque, TypeVetement } from '../types'
 
-type Tri = 'pertinence' | 'nom' | 'facile' | 'rapide'
+type Tri = 'pertinence' | 'nom' | 'facile' | 'rapide' | 'note'
 
 export default function Catalogue({ seulementPerso = false }: { seulementPerso?: boolean }) {
   const { catalogue, state } = useStore()
@@ -15,10 +16,15 @@ export default function Catalogue({ seulementPerso = false }: { seulementPerso?:
   const [diffMax, setDiffMax] = useState(5)
   const [gratuit, setGratuit] = useState(false)
   const [favoris, setFavoris] = useState(false)
+  const [cousus, setCousus] = useState(false)
+  const [, forcer] = useState(0)
   const [tri, setTri] = useState<Tri>('pertinence')
   const [filtresOuverts, setFiltresOuverts] = useState(false)
 
   const base = seulementPerso ? state.patronsPerso : catalogue
+  useEffect(() => {
+    prechargerCache(base).then(() => forcer((n) => n + 1))
+  }, [base])
   const liste = useMemo(() => {
     const r = base.filter(
       (p) =>
@@ -27,16 +33,18 @@ export default function Catalogue({ seulementPerso = false }: { seulementPerso?:
         p.difficulte <= diffMax &&
         (!gratuit || p.gratuit) &&
         (!favoris || state.favoris.includes(p.id)) &&
+        (!cousus || !!state.avis[p.id]?.cousu) &&
         correspond(p, q),
     )
     if (tri === 'nom') r.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
     if (tri === 'facile') r.sort((a, b) => a.difficulte - b.difficulte || moyenneHeures(a) - moyenneHeures(b))
     if (tri === 'rapide') r.sort((a, b) => moyenneHeures(a) - moyenneHeures(b))
+    if (tri === 'note') r.sort((a, b) => (state.avis[b.id]?.note ?? 0) - (state.avis[a.id]?.note ?? 0))
     return r
-  }, [base, ep, type, diffMax, gratuit, favoris, q, tri, state.favoris])
+  }, [base, ep, type, diffMax, gratuit, favoris, cousus, q, tri, state.favoris, state.avis])
 
   const compte = (e: Epoque) => base.filter((p) => p.epoque === e).length
-  const nbFiltres = (type ? 1 : 0) + (diffMax < 5 ? 1 : 0) + (gratuit ? 1 : 0) + (favoris ? 1 : 0)
+  const nbFiltres = (type ? 1 : 0) + (diffMax < 5 ? 1 : 0) + (gratuit ? 1 : 0) + (favoris ? 1 : 0) + (cousus ? 1 : 0)
 
   return (
     <div className="page">
@@ -120,6 +128,7 @@ export default function Catalogue({ seulementPerso = false }: { seulementPerso?:
               <option value="nom">Nom</option>
               <option value="facile">Le plus facile</option>
               <option value="rapide">Le plus rapide</option>
+              <option value="note">Mes mieux notés</option>
             </select>
           </label>
           <div className="ligne-bascules">
@@ -128,6 +137,9 @@ export default function Catalogue({ seulementPerso = false }: { seulementPerso?:
             </label>
             <label className="bascule">
               <input type="checkbox" checked={favoris} onChange={(e) => setFavoris(e.target.checked)} /> Favoris
+            </label>
+            <label className="bascule">
+              <input type="checkbox" checked={cousus} onChange={(e) => setCousus(e.target.checked)} /> Déjà cousus
             </label>
           </div>
           {nbFiltres > 0 && (
@@ -138,6 +150,7 @@ export default function Catalogue({ seulementPerso = false }: { seulementPerso?:
                 setDiffMax(5)
                 setGratuit(false)
                 setFavoris(false)
+                setCousus(false)
               }}
             >
               Effacer les filtres
@@ -165,6 +178,7 @@ export default function Catalogue({ seulementPerso = false }: { seulementPerso?:
               key={p.id}
               p={p}
               favori={state.favoris.includes(p.id)}
+              avis={state.avis[p.id]}
               onClick={() => nav.ouvrir({ nom: 'patron', id: p.id })}
             />
           ))}
