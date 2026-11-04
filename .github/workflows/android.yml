@@ -1,0 +1,63 @@
+name: APK Android
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      VERSION_CODE: ${{ github.run_number }}
+      VERSION_NAME: 1.0.${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Application web
+        run: |
+          npm ci
+          npm run build
+          npx cap sync android
+
+      - name: APK signé
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+          cp app/build/outputs/apk/release/app-release.apk ../SewingCompanion-${VERSION_NAME}.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SewingCompanion-${{ env.VERSION_NAME }}
+          path: SewingCompanion-*.apk
+
+      - name: Publier la release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VERSION_NAME }}
+          name: Sewing Companion ${{ env.VERSION_NAME }}
+          make_latest: true
+          files: SewingCompanion-*.apk
+          body: |
+            Télécharge le fichier **SewingCompanion-${{ env.VERSION_NAME }}.apk** depuis ton téléphone Android et ouvre-le pour l'installer
+            (autorise l'installation depuis ton navigateur si Android le demande).
+            Les mises à jour s'installent par-dessus la version précédente sans perdre tes projets.
