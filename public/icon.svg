@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#f5efe4"/>
+  <!-- bobine -->
+  <rect x="136" y="150" width="150" height="26" rx="8" fill="#6b3f52"/>
+  <rect x="136" y="356" width="150" height="26" rx="8" fill="#6b3f52"/>
+  <rect x="152" y="176" width="118" height="180" fill="#c4553b"/>
+  <g stroke="#a8432c" stroke-width="5">
+    <line x1="152" y1="200" x2="270" y2="208"/>
+    <line x1="152" y1="226" x2="270" y2="234"/>
+    <line x1="152" y1="252" x2="270" y2="260"/>
+    <line x1="152" y1="278" x2="270" y2="286"/>
+    <line x1="152" y1="304" x2="270" y2="312"/>
+    <line x1="152" y1="330" x2="270" y2="338"/>
+  </g>
+  <!-- fil -->
+  <path d="M270 236 C 330 236, 300 330, 360 330 S 400 250, 384 190" fill="none" stroke="#c4553b" stroke-width="7" stroke-linecap="round" stroke-dasharray="1 16"/>
+  <!-- aiguille -->
+  <g transform="rotate(32 392 236)">
+    <rect x="384" y="96" width="16" height="250" rx="8" fill="#2c3a4a"/>
+    <ellipse cx="392" cy="128" rx="3.5" ry="14" fill="#f5efe4"/>
+    <path d="M384 330 L392 372 L400 330 Z" fill="#2c3a4a"/>
+  </g>
+</svg>

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Sewing Companion</string>
+    <string name="title_activity_main">Sewing Companion</string>
+    <string name="package_name">com.carottejy.sewingcompanion</string>
+    <string name="custom_url_scheme">com.carottejy.sewingcompanion</string>
+</resources>
