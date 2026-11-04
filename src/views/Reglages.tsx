@@ -1,6 +1,7 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { URL_CATALOGUE, useStore } from '../store'
-import { Entete, Icone } from '../ui'
+import { Entete, Icone, useNav } from '../ui'
+import { buildInstalle } from '../maj'
 import { aujourdhui, formatDate } from '../lib'
 import { exporterJSON } from '../native'
 import type { AppState, CatalogueFichier } from '../types'
@@ -10,6 +11,12 @@ export default function Reglages() {
   const [msg, setMsg] = useState<string>()
   const [maj, setMaj] = useState(false)
   const fichier = useRef<HTMLInputElement>(null)
+  const nav = useNav()
+  const [version, setVersion] = useState(__APP_VERSION__)
+  const [verifApp, setVerifApp] = useState(false)
+  useEffect(() => {
+    buildInstalle().then((v) => setVersion(v.version)).catch(() => {})
+  }, [])
 
   const exporter = async () => {
     const { catalogueDistant: _ignore, ...donnees } = state
@@ -68,6 +75,27 @@ export default function Reglages() {
       <Entete titre="Réglages" sousTitre="Sauvegarde et catalogue" />
 
       <section className="bloc">
+        <h2>Application</h2>
+        <p>
+          Version installée : <b>{version}</b>
+        </p>
+        <p className="note-discrete">
+          L’application vérifie toute seule les nouvelles versions à l’ouverture (au plus toutes les 6 h) et te propose de les installer.
+        </p>
+        <button
+          className="btn large"
+          disabled={verifApp}
+          onClick={async () => {
+            setVerifApp(true)
+            setMsg(await nav.verifierMaj())
+            setVerifApp(false)
+          }}
+        >
+          {verifApp ? 'Vérification…' : 'Vérifier les mises à jour'}
+        </button>
+      </section>
+
+      <section className="bloc">
         <h2>Catalogue de patrons</h2>
         <p>
           <b>{catalogueInfo.patrons}</b> patrons · mis à jour le {formatDate(catalogueInfo.misAJour)}
@@ -119,7 +147,7 @@ export default function Reglages() {
       <section className="bloc">
         <h2>À propos</h2>
         <p className="note-discrete">
-          Sewing Companion · version {__APP_VERSION__}. Les temps de travail et métrages du catalogue sont des estimations pour
+          Sewing Companion. Les temps de travail et métrages du catalogue sont des estimations pour
           une taille moyenne (sauf mention « d’après l’éditeur ») : réfère-toi toujours aux indications du patron pour ta taille.
           Les patrons appartiennent à leurs éditeurs ; l’application renvoie vers leurs pages.
         </p>

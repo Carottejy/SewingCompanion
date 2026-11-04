@@ -3,6 +3,8 @@ import { App as CapApp } from '@capacitor/app'
 import { StoreProvider, useStore } from './store'
 import { Icone, NavCtx, type Ecran, type Nav, type Onglet } from './ui'
 import { estNatif } from './native'
+import { chercherMiseAJour, type MiseAJour } from './maj'
+import FeuilleMiseAJour from './views/MiseAJour'
 import Projets from './views/Projets'
 import Catalogue from './views/Catalogue'
 import PatronDetail from './views/PatronDetail'
@@ -22,6 +24,7 @@ function Coquille() {
   const [onglet, setOnglet] = useState<Onglet>('projets')
   const [pile, setPile] = useState<Ecran[]>([])
   const [toast, setToast] = useState<string>()
+  const [maj, setMaj] = useState<MiseAJour | null>(null)
   const pileRef = useRef(pile)
   useEffect(() => {
     pileRef.current = pile
@@ -41,7 +44,31 @@ function Coquille() {
       setToast(m)
       setTimeout(() => setToast(undefined), 2200)
     },
+    verifierMaj: async () => {
+      if (!estNatif()) return 'La mise à jour automatique ne concerne que l’application Android.'
+      try {
+        const m = await chercherMiseAJour(false)
+        if (m) {
+          setMaj(m)
+          return `Version ${m.version} disponible.`
+        }
+        return 'Tu as la dernière version.'
+      } catch (e) {
+        return 'Vérification impossible (connexion ?) : ' + (e as Error).message
+      }
+    },
   }
+
+  // vérification silencieuse au lancement et au retour dans l'app
+  useEffect(() => {
+    if (!estNatif()) return
+    const verif = () => chercherMiseAJour(true).then((m) => m && setMaj(m)).catch(() => {})
+    verif()
+    const h = CapApp.addListener('resume', verif)
+    return () => {
+      h.then((x) => x.remove())
+    }
+  }, [])
 
   // bouton retour Android
   useEffect(() => {
@@ -94,6 +121,7 @@ function Coquille() {
           </button>
         ))}
       </nav>
+      {maj && <FeuilleMiseAJour maj={maj} onFermer={() => setMaj(null)} />}
       {toast && (
         <div className="toast" role="status">
           {toast}

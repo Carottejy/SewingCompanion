@@ -18,6 +18,8 @@ export interface Nav {
   remplacer: (e: Ecran) => void
   retour: () => void
   toast: (msg: string) => void
+  /** vérifie les mises à jour ; affiche la feuille si une version existe. Renvoie un message. */
+  verifierMaj: () => Promise<string>
 }
 export const NavCtx = createContext<Nav | null>(null)
 export const useNav = () => useContext(NavCtx)!

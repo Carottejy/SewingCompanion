@@ -320,3 +320,4 @@ input[type='range'] { width: 100%; accent-color: var(--fil); }
   box-shadow: 0 6px 20px rgb(0 0 0 / 0.2); animation: fondu 0.2s; max-width: calc(100% - 40px); text-align: center;
 }
 .message { background: #e3eedd; color: #2f5a2f; padding: 12px 14px; border-radius: 12px; font-weight: 600; }
+.message.erreur { background: #f8e1d9; color: var(--fil-fonce); }
