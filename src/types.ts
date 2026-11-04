@@ -70,6 +70,23 @@ export interface Session {
   note?: string
 }
 
+export interface Tissu {
+  id: string
+  nom: string
+  role: 'tissu' | 'doublure' | 'fourniture'
+  quantite: number
+  unite: string // 'm', 'pièce', 'bobine', 'paquet'
+  /** prix au mètre (ou à l'unité) en euros */
+  prix?: number
+  lien?: string
+  boutique?: string
+  laize?: number
+  composition?: string
+  couleur?: string
+  photo?: string
+  achete?: boolean
+}
+
 export interface Projet {
   id: string
   nom: string
@@ -81,7 +98,9 @@ export interface Projet {
   sessions: Session[]
   /** estimation manuelle (remplace la somme des patrons) */
   heuresManuelles?: number
+  /** ancien champ texte libre, conservé pour les projets existants */
   tissuNotes?: string
+  tissus?: Tissu[]
   image?: string
 }
 

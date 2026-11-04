@@ -17,6 +17,7 @@ import {
   uid,
 } from '../lib'
 import type { Projet, StatutEtape } from '../types'
+import { SectionTissus } from './Tissus'
 
 export default function ProjetDetail({ id }: { id: string }) {
   const { state, trouverPatron, majProjet, supprimerProjet } = useStore()
@@ -177,12 +178,7 @@ export default function ProjetDetail({ id }: { id: string }) {
         )}
       </section>
 
-      {p.tissuNotes && (
-        <section className="bloc">
-          <h2>Tissus & fournitures</h2>
-          <p className="texte-libre">{p.tissuNotes}</p>
-        </section>
-      )}
+      <SectionTissus projet={p} maj={maj} besoin={{ min: b.tissuMin, max: b.tissuMax }} />
 
       <section className="bloc">
         <h2>Journal de couture</h2>

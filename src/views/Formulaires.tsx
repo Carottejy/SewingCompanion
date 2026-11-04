@@ -117,9 +117,6 @@ export function ProjetForm({ id, ajouterPatron }: { id?: string; ajouterPatron?:
         ) : (
           <p className="note-discrete">Le temps estimé est calculé à partir des patrons du projet.</p>
         )}
-        <Champ label="Tissus & fournitures" aide="Liste de courses, références de tissu, boutons…">
-          <textarea rows={3} value={f.tissuNotes ?? ''} onChange={(e) => set('tissuNotes', e.target.value || undefined)} />
-        </Champ>
         <Champ label="Photo (inspiration ou résultat)">
           <ChampPhoto valeur={f.image} onChange={(v) => set('image', v)} />
         </Champ>
