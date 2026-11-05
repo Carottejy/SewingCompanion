@@ -374,3 +374,20 @@ input[type='range'] { width: 100%; accent-color: var(--fil); }
 
 .tissu-notes { font-style: normal; font-size: 0.84rem; color: var(--encre-3); white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-top: 2px; }
 .zone-notes { width: 100%; background: #fffdf8; line-height: 1.5; }
+
+/* ---------- possédé ---------- */
+.pastille.possede { background: #dfe8f0; color: #2f5677; }
+.bouton-possede {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; margin-bottom: 14px;
+  padding: 12px 14px; border-radius: var(--rayon); border: 1.5px dashed var(--trait); background: var(--carte);
+}
+.bouton-possede span:last-child { display: grid; }
+.bouton-possede small { color: var(--encre-3); font-size: 0.8rem; }
+.bouton-possede .case { flex: none; width: 26px; height: 26px; border-radius: 8px; border: 2px solid var(--encre-3); display: grid; place-items: center; color: #fff; }
+.bouton-possede.oui { border-style: solid; border-color: #2f5677; background: #eef3f8; }
+.bouton-possede.oui .case { background: #2f5677; border-color: #2f5677; }
+.segments.sources { margin-bottom: 10px; }
+.segments.sources button { font-size: 0.84rem; padding: 8px 2px; }
+.segments.sources small { opacity: 0.55; font-weight: 500; }
+.segments.sources button { display: grid; gap: 0; line-height: 1.2; }
+.segments.sources small { display: block; font-size: 0.74rem; }

@@ -6,13 +6,14 @@ import { lienRecherche, ouvrirLien } from '../native'
 import { AvisEnLigne, MonAvis, PhotoModele } from './Avis'
 
 export default function PatronDetail({ id }: { id: string }) {
-  const { trouverPatron, state, basculerFavori, majProjet, supprimerPatronPerso } = useStore()
+  const { trouverPatron, state, basculerFavori, basculerPossede, majProjet, supprimerPatronPerso } = useStore()
   const nav = useNav()
   const [choix, setChoix] = useState(false)
   const p = trouverPatron(id)
   if (!p) return <div className="page"><Entete titre="Patron" retour /><Vide titre="Patron introuvable" texte="Il a peut-être été supprimé." /></div>
 
   const favori = state.favoris.includes(p.id)
+  const possede = state.possedes.includes(p.id)
   const projetsOuverts = state.projets.filter((x) => x.statut !== 'termine')
   const utilisations = state.projets.filter((x) => x.patrons.some((e) => e.patronId === p.id))
 
@@ -89,6 +90,21 @@ export default function PatronDetail({ id }: { id: string }) {
           </p>
         )}
       </section>
+
+      <button
+        className={'bouton-possede' + (possede ? ' oui' : '')}
+        aria-pressed={possede}
+        onClick={() => {
+          basculerPossede(p.id)
+          nav.toast(possede ? 'Retiré de mes patrons possédés' : 'Ajouté à mes patrons possédés')
+        }}
+      >
+        <span className="case">{possede && <Icone n="check" petite />}</span>
+        <span>
+          <strong>{possede ? 'Je possède ce patron' : 'Je possède ce patron ?'}</strong>
+          <small>{possede ? 'Touche pour retirer' : 'Touche pour l’indiquer'}</small>
+        </span>
+      </button>
 
       <div className="actions-colonne">
         <button className="btn primaire large" onClick={() => setChoix(true)}>

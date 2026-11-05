@@ -280,20 +280,58 @@ function AjoutTemps({ onFermer, onAjout }: { onFermer: () => void; onAjout: (h: 
   )
 }
 
+type Source = 'tous' | 'catalogue' | 'possedes' | 'perso'
+
 function ChoixPatron({ onFermer, onChoix }: { onFermer: () => void; onChoix: (id: string) => void }) {
   const { catalogue, state } = useStore()
   const [q, setQ] = useState('')
+  const [source, setSource] = useState<Source>(() => (state.possedes.length || state.patronsPerso.length ? 'possedes' : 'tous'))
+  const possede = (id: string) => state.possedes.includes(id)
+  const compte: Record<Source, number> = {
+    tous: catalogue.length,
+    catalogue: catalogue.filter((x) => !x.perso).length,
+    possedes: catalogue.filter((x) => possede(x.id)).length,
+    perso: state.patronsPerso.length,
+  }
   const liste = useMemo(() => {
-    const r = catalogue.filter((x) => correspond(x, q))
-    // favoris et patrons perso en premier
-    const score = (id: string, perso?: boolean) => (perso ? 2 : 0) + (state.favoris.includes(id) ? 1 : 0)
-    return r.sort((a, b) => score(b.id, b.perso) - score(a.id, a.perso)).slice(0, 60)
-  }, [catalogue, q, state.favoris])
+    const r = catalogue.filter(
+      (x) =>
+        (source === 'tous' ||
+          (source === 'catalogue' && !x.perso) ||
+          (source === 'possedes' && state.possedes.includes(x.id)) ||
+          (source === 'perso' && x.perso)) &&
+        correspond(x, q),
+    )
+    // possédés, perso puis favoris en premier
+    const score = (x: (typeof r)[number]) =>
+      (state.possedes.includes(x.id) ? 4 : 0) + (x.perso ? 2 : 0) + (state.favoris.includes(x.id) ? 1 : 0)
+    return r.sort((a, b) => score(b) - score(a)).slice(0, 80)
+  }, [catalogue, q, source, state.favoris, state.possedes])
+  const vide: Record<Source, string> = {
+    tous: 'Aucun patron trouvé.',
+    catalogue: 'Aucun patron du catalogue ne correspond.',
+    possedes: 'Aucun patron possédé. Sur la fiche d’un patron, touche « Je possède ce patron ».',
+    perso: 'Aucun patron personnalisé. Ajoute-les depuis l’onglet « Mes patrons ».',
+  }
   return (
     <Feuille titre="Ajouter un patron" onFermer={onFermer}>
+      <div className="segments sources" role="tablist" aria-label="Origine des patrons">
+        {(
+          [
+            ['tous', 'Tous'],
+            ['catalogue', 'Catalogue'],
+            ['possedes', 'Possédés'],
+            ['perso', 'Perso'],
+          ] as [Source, string][]
+        ).map(([s, l]) => (
+          <button key={s} role="tab" aria-selected={source === s} className={source === s ? 'actif' : ''} onClick={() => setSource(s)}>
+            {l} <small>{compte[s]}</small>
+          </button>
+        ))}
+      </div>
       <label className="champ-recherche" style={{ marginBottom: 12 }}>
         <Icone n="loupe" petite />
-        <input type="search" autoFocus placeholder="Rechercher dans le catalogue…" value={q} onChange={(e) => setQ(e.target.value)} />
+        <input type="search" placeholder="Rechercher…" value={q} onChange={(e) => setQ(e.target.value)} />
       </label>
       <div className="liste-choix">
         {liste.map((x) => (
@@ -302,14 +340,16 @@ function ChoixPatron({ onFermer, onChoix }: { onFermer: () => void; onChoix: (id
             <span className="choix-texte">
               <strong>{x.nom}</strong>
               <small>
-                {x.perso ? 'Mon patron · ' : state.favoris.includes(x.id) ? '★ ' : ''}
+                {x.perso ? 'Perso · ' : ''}
+                {possede(x.id) ? 'Possédé · ' : ''}
+                {state.favoris.includes(x.id) ? '★ ' : ''}
                 {epoque(x.epoque).label} · {x.marque} · {plage(x.heuresMin, x.heuresMax, fmtH)}
               </small>
             </span>
             <Icone n="plus" petite />
           </button>
         ))}
-        {liste.length === 0 && <p className="note-discrete">Aucun patron trouvé.</p>}
+        {liste.length === 0 && <p className="note-discrete">{q ? 'Aucun patron trouvé.' : vide[source]}</p>}
       </div>
     </Feuille>
   )

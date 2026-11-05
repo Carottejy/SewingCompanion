@@ -65,7 +65,7 @@ export function BadgeEpoque({ p }: { p: Pick<Patron, 'epoque' | 'periode'> }) {
   )
 }
 
-export function CartePatron({ p, onClick, favori, avis }: { p: Patron; onClick: () => void; favori?: boolean; avis?: Avis }) {
+export function CartePatron({ p, onClick, favori, avis, possede }: { p: Patron; onClick: () => void; favori?: boolean; avis?: Avis; possede?: boolean }) {
   const vignette = p.image ?? photoEnCache(p)
   return (
     <button className="carte-patron" onClick={onClick} style={{ ['--c' as string]: epoque(p.epoque).couleur }}>
@@ -75,6 +75,7 @@ export function CartePatron({ p, onClick, favori, avis }: { p: Patron; onClick: 
           <BadgeEpoque p={p} />
           {p.gratuit && <span className="pastille gratuit">Gratuit</span>}
           {p.perso && <span className="pastille perso">Mon patron</span>}
+          {possede && <span className="pastille possede">Possédé</span>}
           {favori && <Icone n="etoile-pleine" petite />}
           {avis?.cousu && <span className="pastille gratuit">Cousu ✓</span>}
           {avis?.note ? <span className="note-mini">{'★'.repeat(avis.note)}</span> : null}

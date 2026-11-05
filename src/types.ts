@@ -126,6 +126,8 @@ export interface AppState {
   projets: Projet[]
   patronsPerso: Patron[]
   favoris: string[]
+  /** identifiants des patrons que je possède */
+  possedes: string[]
   avis: Record<string, Avis>
   catalogueDistant?: CatalogueFichier
 }

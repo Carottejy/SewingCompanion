@@ -7,7 +7,7 @@ const CLE = 'sewing-companion-state-v1'
 export const URL_CATALOGUE =
   'https://raw.githubusercontent.com/Carottejy/SewingCompanion/main/src/data/catalogue.json'
 
-const VIDE: AppState = { projets: [], patronsPerso: [], favoris: [], avis: {} }
+const VIDE: AppState = { projets: [], patronsPerso: [], favoris: [], possedes: [], avis: {} }
 
 interface Store {
   pret: boolean
@@ -20,6 +20,7 @@ interface Store {
   majPatronPerso: (p: Patron) => void
   supprimerPatronPerso: (id: string) => void
   basculerFavori: (id: string) => void
+  basculerPossede: (id: string) => void
   majAvis: (id: string, a: Avis | null) => void
   remplacerTout: (s: AppState) => void
   definirCatalogueDistant: (c: CatalogueFichier) => void
@@ -97,6 +98,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         ...s,
         patronsPerso: s.patronsPerso.filter((x) => x.id !== id),
         projets: s.projets.map((pr) => ({ ...pr, patrons: pr.patrons.filter((e) => e.patronId !== id) })),
+      })),
+    basculerPossede: (id) =>
+      setState((s) => ({
+        ...s,
+        possedes: s.possedes.includes(id) ? s.possedes.filter((f) => f !== id) : [...s.possedes, id],
       })),
     basculerFavori: (id) =>
       setState((s) => ({

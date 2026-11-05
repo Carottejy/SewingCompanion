@@ -17,6 +17,7 @@ export default function Catalogue({ seulementPerso = false }: { seulementPerso?:
   const [gratuit, setGratuit] = useState(false)
   const [favoris, setFavoris] = useState(false)
   const [cousus, setCousus] = useState(false)
+  const [possedes, setPossedes] = useState(false)
   const [, forcer] = useState(0)
   const [tri, setTri] = useState<Tri>('pertinence')
   const [filtresOuverts, setFiltresOuverts] = useState(false)
@@ -34,6 +35,7 @@ export default function Catalogue({ seulementPerso = false }: { seulementPerso?:
         (!gratuit || p.gratuit) &&
         (!favoris || state.favoris.includes(p.id)) &&
         (!cousus || !!state.avis[p.id]?.cousu) &&
+        (!possedes || state.possedes.includes(p.id)) &&
         correspond(p, q),
     )
     if (tri === 'nom') r.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
@@ -41,10 +43,10 @@ export default function Catalogue({ seulementPerso = false }: { seulementPerso?:
     if (tri === 'rapide') r.sort((a, b) => moyenneHeures(a) - moyenneHeures(b))
     if (tri === 'note') r.sort((a, b) => (state.avis[b.id]?.note ?? 0) - (state.avis[a.id]?.note ?? 0))
     return r
-  }, [base, ep, type, diffMax, gratuit, favoris, cousus, q, tri, state.favoris, state.avis])
+  }, [base, ep, type, diffMax, gratuit, favoris, cousus, q, tri, state.favoris, state.avis, possedes, state.possedes])
 
   const compte = (e: Epoque) => base.filter((p) => p.epoque === e).length
-  const nbFiltres = (type ? 1 : 0) + (diffMax < 5 ? 1 : 0) + (gratuit ? 1 : 0) + (favoris ? 1 : 0) + (cousus ? 1 : 0)
+  const nbFiltres = (type ? 1 : 0) + (diffMax < 5 ? 1 : 0) + (gratuit ? 1 : 0) + (favoris ? 1 : 0) + (cousus ? 1 : 0) + (possedes ? 1 : 0)
 
   return (
     <div className="page">
@@ -139,6 +141,9 @@ export default function Catalogue({ seulementPerso = false }: { seulementPerso?:
               <input type="checkbox" checked={favoris} onChange={(e) => setFavoris(e.target.checked)} /> Favoris
             </label>
             <label className="bascule">
+              <input type="checkbox" checked={possedes} onChange={(e) => setPossedes(e.target.checked)} /> Possédés
+            </label>
+            <label className="bascule">
               <input type="checkbox" checked={cousus} onChange={(e) => setCousus(e.target.checked)} /> Déjà cousus
             </label>
           </div>
@@ -151,6 +156,7 @@ export default function Catalogue({ seulementPerso = false }: { seulementPerso?:
                 setGratuit(false)
                 setFavoris(false)
                 setCousus(false)
+                setPossedes(false)
               }}
             >
               Effacer les filtres
@@ -179,6 +185,7 @@ export default function Catalogue({ seulementPerso = false }: { seulementPerso?:
               p={p}
               favori={state.favoris.includes(p.id)}
               avis={state.avis[p.id]}
+              possede={state.possedes.includes(p.id)}
               onClick={() => nav.ouvrir({ nom: 'patron', id: p.id })}
             />
           ))}

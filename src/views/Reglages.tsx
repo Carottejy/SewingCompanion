@@ -41,6 +41,7 @@ export default function Reglages() {
         projets: d.projets,
         patronsPerso: d.patronsPerso ?? [],
         favoris: d.favoris ?? [],
+        possedes: d.possedes ?? [],
         avis: d.avis ?? {},
         catalogueDistant: state.catalogueDistant,
       })
@@ -113,7 +114,8 @@ export default function Reglages() {
         <h2>Mes données</h2>
         <p>
           {state.projets.length} projet{state.projets.length > 1 ? 's' : ''} · {state.patronsPerso.length} patron
-          {state.patronsPerso.length > 1 ? 's' : ''} perso · {state.favoris.length} favori{state.favoris.length > 1 ? 's' : ''}
+          {state.patronsPerso.length > 1 ? 's' : ''} perso · {state.favoris.length} favori{state.favoris.length > 1 ? 's' : ''} ·{' '}
+          {state.possedes.length} possédé{state.possedes.length > 1 ? 's' : ''}
         </p>
         <p className="note-discrete">
           Tout est enregistré sur ton téléphone uniquement. Exporte une sauvegarde de temps en temps (avant de changer de téléphone, par exemple).
