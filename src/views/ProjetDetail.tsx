@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../store'
 import { BadgeEpoque, Difficulte, Entete, Feuille, Icone, Vide, useNav } from '../ui'
 import {
@@ -180,6 +180,8 @@ export default function ProjetDetail({ id }: { id: string }) {
 
       <SectionTissus projet={p} maj={maj} besoin={{ min: b.tissuMin, max: b.tissuMax }} />
 
+      <NotesProjet key={p.id} p={p} maj={maj} />
+
       <section className="bloc">
         <h2>Journal de couture</h2>
         {p.sessions.length === 0 ? (
@@ -310,5 +312,49 @@ function ChoixPatron({ onFermer, onChoix }: { onFermer: () => void; onChoix: (id
         {liste.length === 0 && <p className="note-discrete">Aucun patron trouvé.</p>}
       </div>
     </Feuille>
+  )
+}
+
+function NotesProjet({ p, maj }: { p: Projet; maj: (patch: Partial<Projet>) => void }) {
+  // les anciennes notes « tissus » sont reprises dans les notes du projet
+  const initial = p.notes ?? p.tissuNotes ?? ''
+  const [texte, setTexte] = useState(initial)
+  const [modifie, setModifie] = useState(false)
+  const majRef = useRef(maj)
+  useEffect(() => {
+    majRef.current = maj
+  })
+  const sauver = () => {
+    if (!modifie) return
+    maj({ notes: texte.trim() ? texte : undefined, tissuNotes: undefined })
+    setModifie(false)
+  }
+  // enregistrement automatique 700 ms après la dernière frappe
+  useEffect(() => {
+    if (!modifie) return
+    const t = setTimeout(() => {
+      majRef.current({ notes: texte.trim() ? texte : undefined, tissuNotes: undefined })
+      setModifie(false)
+    }, 700)
+    return () => clearTimeout(t)
+  }, [texte, modifie])
+  return (
+    <section className="bloc">
+      <div className="bloc-titre">
+        <h2>Notes</h2>
+        <small className="note-discrete">{modifie ? 'Enregistrement…' : texte ? 'Enregistré' : ''}</small>
+      </div>
+      <textarea
+        className="zone-notes"
+        rows={Math.min(14, Math.max(4, texte.split('\n').length + 1))}
+        value={texte}
+        placeholder="Idées, mesures, retouches à faire, essayages, inspirations…"
+        onChange={(e) => {
+          setTexte(e.target.value)
+          setModifie(true)
+        }}
+        onBlur={sauver}
+      />
+    </section>
   )
 }

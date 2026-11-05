@@ -357,8 +357,7 @@ input[type='range'] { width: 100%; accent-color: var(--fil); }
 .alerte-texte { color: var(--fil-fonce) !important; font-weight: 600; }
 .liste-tissus { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .tissu { border: 1.5px solid var(--trait); border-radius: 12px; background: #fff; overflow: hidden; }
-.tissu.achete { opacity: 0.72; }
-.tissu.achete strong { text-decoration: line-through; text-decoration-color: var(--ok); }
+.tissu.achete { border-left: 4px solid var(--ok); }
 .tissu-corps { display: flex; gap: 12px; width: 100%; text-align: left; border: none; background: none; padding: 10px 12px 6px; align-items: center; }
 .tissu-corps img, .tissu-pastille { flex: none; width: 56px; height: 56px; border-radius: 10px; object-fit: cover; border: 1px solid var(--trait); }
 .tissu-texte { display: grid; gap: 2px; min-width: 0; }
@@ -372,3 +371,6 @@ input[type='range'] { width: 100%; accent-color: var(--fil); }
 .anciennes-notes { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--trait); }
 .feuille .segments { margin-bottom: 0; }
 .tissu-pastille { display: grid; place-items: center; color: var(--encre-3); }
+
+.tissu-notes { font-style: normal; font-size: 0.84rem; color: var(--encre-3); white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-top: 2px; }
+.zone-notes { width: 100%; background: #fffdf8; line-height: 1.5; }

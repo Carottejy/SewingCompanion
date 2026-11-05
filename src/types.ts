@@ -85,6 +85,7 @@ export interface Tissu {
   couleur?: string
   photo?: string
   achete?: boolean
+  notes?: string
 }
 
 export interface Projet {
@@ -101,6 +102,7 @@ export interface Projet {
   /** ancien champ texte libre, conservé pour les projets existants */
   tissuNotes?: string
   tissus?: Tissu[]
+  notes?: string
   image?: string
 }
 

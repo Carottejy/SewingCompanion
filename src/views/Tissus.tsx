@@ -85,6 +85,7 @@ export function SectionTissus({
                         {[t.composition, t.boutique, t.laize && `laize ${t.laize} cm`].filter(Boolean).join(' · ')}
                       </small>
                     )}
+                    {t.notes && <em className="tissu-notes">{t.notes}</em>}
                   </span>
                 </button>
                 <div className="tissu-actions">
@@ -101,16 +102,6 @@ export function SectionTissus({
             ))}
           </ul>
         </>
-      )}
-
-      {projet.tissuNotes && (
-        <div className="anciennes-notes">
-          <span className="etiquette">Notes</span>
-          <p className="texte-libre">{projet.tissuNotes}</p>
-          <button className="btn lien petit" onClick={() => confirm('Supprimer ces notes ?') && maj({ tissuNotes: undefined })}>
-            Supprimer les notes
-          </button>
-        </div>
       )}
 
       {edition && (
@@ -259,6 +250,10 @@ function FormTissu({
             </label>
           )}
         </div>
+        <label>
+          Notes
+          <textarea rows={3} value={t.notes ?? ''} placeholder="Lavage, rétrécissement, sens du motif, à commander en même temps que…" onChange={(e) => set('notes', e.target.value || undefined)} />
+        </label>
         <label className="bascule">
           <input type="checkbox" checked={!!t.achete} onChange={(e) => set('achete', e.target.checked)} /> Déjà acheté
         </label>
