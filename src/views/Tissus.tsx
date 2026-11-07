@@ -222,7 +222,11 @@ export function FormArticle({
   const { state } = useStore()
   const stockDispo = state.stock.filter((t) => t.quantite > 0)
   const [choisirStock, setChoisirStock] = useState(mode === 'projet' && !initial && stockDispo.length > 0)
-  const [t, setT] = useState<Tissu>(initial ?? { id: uid(), nom: '', quantite: 1, unite: 'm', role: 'tissu' })
+  const [t, setT] = useState<Tissu>(() => {
+    const base: Tissu = initial ?? { id: uid(), nom: '', quantite: 1, unite: 'm', role: 'tissu' }
+    // pas de doublure dans le stock : elle est rangée avec les tissus
+    return mode === 'stock' && base.role === 'doublure' ? { ...base, role: 'tissu' } : base
+  })
   const [prix, setPrix] = useState(initial?.prix !== undefined ? String(initial.prix).replace('.', ',') : '')
   const [quantite, setQuantite] = useState(String(t.quantite).replace('.', ','))
   const set = <K extends keyof Tissu>(k: K, v: Tissu[K]) => setT((x) => ({ ...x, [k]: v }))
@@ -284,7 +288,9 @@ export function FormArticle({
               ['doublure', 'Doublure'],
               ['fourniture', 'Fourniture'],
             ] as const
-          ).map(([r, l]) => (
+          )
+            .filter(([r]) => mode === 'projet' || r !== 'doublure')
+            .map(([r, l]) => (
             <button
               key={r}
               type="button"

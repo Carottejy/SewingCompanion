@@ -6,7 +6,7 @@ import { ouvrirLien } from '../native'
 import { coutTissu, euro, FormArticle, LigneArticle } from './Tissus'
 import type { Tissu } from '../types'
 
-type Filtre = 'tous' | 'tissu' | 'doublure' | 'fourniture'
+type Filtre = 'tous' | 'tissu' | 'fourniture'
 type Tri = 'recent' | 'nom' | 'quantite'
 
 export default function Stock() {
@@ -29,7 +29,7 @@ export default function Stock() {
   const liste = useMemo(() => {
     const r = state.stock.filter(
       (t) =>
-        (filtre === 'tous' || t.role === filtre) &&
+        (filtre === 'tous' || (filtre === 'fourniture' ? t.role === 'fourniture' : t.role !== 'fourniture')) &&
         (epuises || t.quantite > 0) &&
         correspond0([t.nom, t.composition, t.boutique, t.origine, t.emplacement, t.notes], q),
     )
@@ -42,7 +42,8 @@ export default function Stock() {
   const metres = dispo.filter((t) => t.unite === 'm' && t.role !== 'fourniture').reduce((s, t) => s + t.quantite, 0)
   const valeur = dispo.reduce((s, t) => s + coutTissu(t), 0)
   const nbEpuises = state.stock.length - dispo.length
-  const compte = (f: Filtre) => dispo.filter((t) => f === 'tous' || t.role === f).length
+  const compte = (f: Filtre) =>
+    dispo.filter((t) => f === 'tous' || (f === 'fourniture' ? t.role === 'fourniture' : t.role !== 'fourniture')).length
 
   return (
     <div className="page">
@@ -54,7 +55,7 @@ export default function Stock() {
       {state.stock.length === 0 ? (
         <Vide
           titre="Ton stock est vide"
-          texte="Ajoute tes tissus, doublures et fournitures avec leur quantité, leur origine et une photo. Tu pourras ensuite les prendre dans tes projets."
+          texte="Ajoute tes tissus et fournitures avec leur quantité, leur origine et une photo. Tu pourras ensuite les prendre dans tes projets."
           action={
             <button className="btn primaire" onClick={() => setEdition('nouveau')}>
               <Icone n="plus" petite /> Ajouter au stock
@@ -91,7 +92,6 @@ export default function Stock() {
               [
                 ['tous', 'Tous'],
                 ['tissu', 'Tissus'],
-                ['doublure', 'Doublures'],
                 ['fourniture', 'Fournitures'],
               ] as [Filtre, string][]
             ).map(([f, l]) => (
@@ -154,7 +154,7 @@ export default function Stock() {
           initial={edition === 'nouveau' ? undefined : edition}
           onFermer={() => setEdition(null)}
           onEnregistrer={(t) => {
-            majStock(t)
+            majStock(t.role === 'doublure' ? { ...t, role: 'tissu' } : t)
             setEdition(null)
             if (edition === 'nouveau') nav.toast('Ajouté au stock')
           }}
