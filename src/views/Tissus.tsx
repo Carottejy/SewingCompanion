@@ -1,18 +1,65 @@
-import { useState } from 'react'
-import { Feuille, Icone } from '../ui'
-import { compresserImage, fmtM, plage, uid } from '../lib'
+import { useMemo, useState } from 'react'
+import { useStore } from '../store'
+import { Feuille, Icone, useNav } from '../ui'
+import { compresserImage, correspond0, fmtM, plage, uid } from '../lib'
 import { ouvrirLien } from '../native'
 import type { Projet, Tissu } from '../types'
 
-const euro = (n: number) => n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })
-const qte = (t: Tissu) =>
-  t.unite === 'm' ? fmtM(t.quantite) : `${String(t.quantite).replace('.', ',')} ${t.unite}${t.quantite > 1 ? 's' : ''}`
+export const euro = (n: number) => n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })
+export const qte = (t: Pick<Tissu, 'unite' | 'quantite'>, q = t.quantite) =>
+  t.unite === 'm' ? fmtM(q) : `${String(Math.round(q * 100) / 100).replace('.', ',')} ${t.unite}${q > 1 ? 's' : ''}`
 export const coutTissu = (t: Tissu) => (t.prix ?? 0) * t.quantite
 const num = (v: string) => {
   const n = parseFloat(v.replace(',', '.'))
   return isNaN(n) ? undefined : n
 }
 
+export const ORIGINES = ['Achat en boutique', 'Achat en ligne', 'Marché / salon', 'Don', 'Récupération', 'Coupon / chute', 'Héritage']
+
+/* ---------- ligne d'article (projet et stock) ---------- */
+export function LigneArticle({
+  t,
+  onClick,
+  actions,
+  sousTitre,
+}: {
+  t: Tissu
+  onClick: () => void
+  actions?: React.ReactNode
+  sousTitre?: string
+}) {
+  return (
+    <li className={'tissu' + (t.achete ? ' achete' : '') + (t.quantite <= 0 ? ' epuise' : '')}>
+      <button className="tissu-corps" onClick={onClick}>
+        {t.photo ? (
+          <img src={t.photo} alt="" />
+        ) : (
+          <span className="tissu-pastille" style={{ background: t.couleur || 'var(--papier-2)' }}>
+            {!t.couleur && <Icone n={t.role === 'fourniture' ? 'ciseaux' : 'tissu'} />}
+          </span>
+        )}
+        <span className="tissu-texte">
+          <strong>{t.nom}</strong>
+          <small>
+            {t.quantite <= 0 ? 'Épuisé' : qte(t)}
+            {t.prix !== undefined && t.quantite > 0 && ` × ${euro(t.prix)}${t.unite === 'm' ? '/m' : ''} = ${euro(coutTissu(t))}`}
+          </small>
+          {sousTitre !== undefined ? (
+            sousTitre && <small>{sousTitre}</small>
+          ) : (
+            (t.boutique || t.laize || t.composition) && (
+              <small>{[t.composition, t.boutique, t.laize && `laize ${t.laize} cm`].filter(Boolean).join(' · ')}</small>
+            )
+          )}
+          {t.notes && <em className="tissu-notes">{t.notes}</em>}
+        </span>
+      </button>
+      {actions && <div className="tissu-actions">{actions}</div>}
+    </li>
+  )
+}
+
+/* ---------- section du projet ---------- */
 export function SectionTissus({
   projet,
   maj,
@@ -22,15 +69,34 @@ export function SectionTissus({
   maj: (patch: Partial<Projet>) => void
   besoin: { min: number; max: number }
 }) {
+  const { state, majStock } = useStore()
+  const nav = useNav()
   const [edition, setEdition] = useState<Tissu | 'nouveau' | null>(null)
   const tissus = projet.tissus ?? []
   const total = tissus.reduce((s, t) => s + coutTissu(t), 0)
   const resteAAcheter = tissus.filter((t) => !t.achete).reduce((s, t) => s + coutTissu(t), 0)
   const metres = tissus.filter((t) => t.unite === 'm' && t.role !== 'fourniture').reduce((s, t) => s + t.quantite, 0)
 
-  const enregistrer = (t: Tissu) => {
+  const enregistrer = (t: Tissu, prisDuStock?: number) => {
     const existe = tissus.some((x) => x.id === t.id)
     maj({ tissus: existe ? tissus.map((x) => (x.id === t.id ? t : x)) : [...tissus, t] })
+    if (prisDuStock && t.stockId) {
+      const s = state.stock.find((x) => x.id === t.stockId)
+      if (s) {
+        majStock({ ...s, quantite: Math.max(0, Math.round((s.quantite - prisDuStock) * 100) / 100) })
+        nav.toast(`${qte(s, prisDuStock)} retiré${prisDuStock > 1 ? 's' : ''} du stock`)
+      }
+    }
+    setEdition(null)
+  }
+
+  const supprimer = (t: Tissu) => {
+    const s = t.stockId ? state.stock.find((x) => x.id === t.stockId) : undefined
+    if (!s && !confirm(`Retirer « ${t.nom} » du projet ?`)) return
+    if (s && confirm(`Remettre ${qte(t)} de « ${s.nom} » dans le stock ?`)) {
+      majStock({ ...s, quantite: Math.round((s.quantite + t.quantite) * 100) / 100 })
+    }
+    maj({ tissus: tissus.filter((x) => x.id !== t.id) })
     setEdition(null)
   }
 
@@ -45,7 +111,7 @@ export function SectionTissus({
 
       {tissus.length === 0 ? (
         <p className="note-discrete">
-          Ajoute les tissus et fournitures un par un : lien vers la boutique, prix, quantité et photo.
+          Ajoute les tissus et fournitures un par un, ou prends-les dans ton stock.
           {besoin.max > 0 && ` Les patrons du projet demandent environ ${plage(besoin.min, besoin.max, fmtM)} de tissu.`}
         </p>
       ) : (
@@ -69,83 +135,148 @@ export function SectionTissus({
           </div>
           <ul className="liste-tissus">
             {tissus.map((t) => (
-              <li key={t.id} className={'tissu' + (t.achete ? ' achete' : '')}>
-                <button className="tissu-corps" onClick={() => setEdition(t)}>
-                  {t.photo ? <img src={t.photo} alt="" /> : <span className="tissu-pastille" style={{ background: t.couleur || 'var(--papier-2)' }}>
-                      {!t.couleur && <Icone n={t.role === 'fourniture' ? 'ciseaux' : 'tissu'} />}
-                    </span>}
-                  <span className="tissu-texte">
-                    <strong>{t.nom}</strong>
-                    <small>
-                      {qte(t)}
-                      {t.prix !== undefined && ` × ${euro(t.prix)}${t.unite === 'm' ? '/m' : ''} = ${euro(coutTissu(t))}`}
-                    </small>
-                    {(t.boutique || t.laize || t.composition) && (
-                      <small>
-                        {[t.composition, t.boutique, t.laize && `laize ${t.laize} cm`].filter(Boolean).join(' · ')}
-                      </small>
+              <LigneArticle
+                key={t.id}
+                t={t}
+                onClick={() => setEdition(t)}
+                sousTitre={
+                  t.stockId
+                    ? ['Pris dans le stock', t.composition, t.laize && `laize ${t.laize} cm`].filter(Boolean).join(' · ')
+                    : undefined
+                }
+                actions={
+                  <>
+                    <label className="bascule petite">
+                      <input type="checkbox" checked={!!t.achete} onChange={(e) => enregistrer({ ...t, achete: e.target.checked })} /> Acheté
+                    </label>
+                    {t.lien && (
+                      <button className="icone-btn petit" aria-label="Ouvrir le lien" onClick={() => ouvrirLien(t.lien!)}>
+                        <Icone n="lien" petite />
+                      </button>
                     )}
-                    {t.notes && <em className="tissu-notes">{t.notes}</em>}
-                  </span>
-                </button>
-                <div className="tissu-actions">
-                  <label className="bascule petite">
-                    <input type="checkbox" checked={!!t.achete} onChange={(e) => enregistrer({ ...t, achete: e.target.checked })} /> Acheté
-                  </label>
-                  {t.lien && (
-                    <button className="icone-btn petit" aria-label="Ouvrir le lien" onClick={() => ouvrirLien(t.lien!)}>
-                      <Icone n="lien" petite />
-                    </button>
-                  )}
-                </div>
-              </li>
+                  </>
+                }
+              />
             ))}
           </ul>
         </>
       )}
 
       {edition && (
-        <FormTissu
+        <FormArticle
+          mode="projet"
           initial={edition === 'nouveau' ? undefined : edition}
           onFermer={() => setEdition(null)}
           onEnregistrer={enregistrer}
-          onSupprimer={(id) => {
-            maj({ tissus: tissus.filter((x) => x.id !== id) })
-            setEdition(null)
-          }}
+          onSupprimer={supprimer}
         />
       )}
     </section>
   )
 }
 
-function FormTissu({
+/* ---------- choix d'un article du stock ---------- */
+function ChoixStock({ onChoix, onAnnuler }: { onChoix: (t: Tissu) => void; onAnnuler: () => void }) {
+  const { state } = useStore()
+  const [q, setQ] = useState('')
+  const dispo = useMemo(
+    () => state.stock.filter((t) => t.quantite > 0 && correspond0([t.nom, t.composition, t.boutique, t.notes], q)),
+    [state.stock, q],
+  )
+  return (
+    <div className="choix-stock">
+      <div className="bloc-titre">
+        <span className="etiquette">Mon stock</span>
+        <button type="button" className="btn lien petit" onClick={onAnnuler}>
+          Saisir à la main
+        </button>
+      </div>
+      <label className="champ-recherche" style={{ marginBottom: 10 }}>
+        <Icone n="loupe" petite />
+        <input type="search" placeholder="Chercher dans le stock…" value={q} onChange={(e) => setQ(e.target.value)} />
+      </label>
+      <ul className="liste-tissus">
+        {dispo.map((t) => (
+          <LigneArticle key={t.id} t={t} onClick={() => onChoix(t)} />
+        ))}
+      </ul>
+      {dispo.length === 0 && <p className="note-discrete">Rien de disponible dans le stock.</p>}
+    </div>
+  )
+}
+
+/* ---------- formulaire partagé ---------- */
+export function FormArticle({
+  mode,
   initial,
   onFermer,
   onEnregistrer,
   onSupprimer,
 }: {
+  mode: 'projet' | 'stock'
   initial?: Tissu
   onFermer: () => void
-  onEnregistrer: (t: Tissu) => void
-  onSupprimer: (id: string) => void
+  onEnregistrer: (t: Tissu, prisDuStock?: number) => void
+  onSupprimer: (t: Tissu) => void
 }) {
+  const { state } = useStore()
+  const stockDispo = state.stock.filter((t) => t.quantite > 0)
+  const [choisirStock, setChoisirStock] = useState(mode === 'projet' && !initial && stockDispo.length > 0)
   const [t, setT] = useState<Tissu>(initial ?? { id: uid(), nom: '', quantite: 1, unite: 'm', role: 'tissu' })
   const [prix, setPrix] = useState(initial?.prix !== undefined ? String(initial.prix).replace('.', ',') : '')
   const [quantite, setQuantite] = useState(String(t.quantite).replace('.', ','))
   const set = <K extends keyof Tissu>(k: K, v: Tissu[K]) => setT((x) => ({ ...x, [k]: v }))
   const q = num(quantite) ?? 0
   const p = num(prix)
+  const source = t.stockId ? state.stock.find((x) => x.id === t.stockId) : undefined
+  const prendDuStock = mode === 'projet' && !initial && !!source
+
+  const depuisStock = (s: Tissu) => {
+    setT({
+      ...s,
+      id: uid(),
+      stockId: s.id,
+      achete: true,
+      notes: undefined,
+      origine: undefined,
+      emplacement: undefined,
+      dateAchat: undefined,
+    })
+    setPrix(s.prix !== undefined ? String(s.prix).replace('.', ',') : '')
+    setQuantite(String(s.quantite).replace('.', ','))
+    setChoisirStock(false)
+  }
+
+  const titre = initial ? 'Modifier' : mode === 'stock' ? 'Ajouter au stock' : 'Ajouter un tissu ou une fourniture'
+
+  if (choisirStock)
+    return (
+      <Feuille titre={titre} onFermer={onFermer}>
+        <ChoixStock onChoix={depuisStock} onAnnuler={() => setChoisirStock(false)} />
+      </Feuille>
+    )
 
   return (
-    <Feuille titre={initial ? 'Modifier' : 'Ajouter un tissu ou une fourniture'} onFermer={onFermer}>
+    <Feuille titre={titre} onFermer={onFermer}>
       <form
         className="formulaire"
         onSubmit={(e) => {
           e.preventDefault()
-          if (t.nom.trim()) onEnregistrer({ ...t, nom: t.nom.trim(), quantite: q, prix: p })
+          if (!t.nom.trim()) return
+          const pris = prendDuStock ? Math.min(q, source!.quantite) : undefined
+          onEnregistrer({ ...t, nom: t.nom.trim(), quantite: prendDuStock ? pris! : q, prix: p }, pris)
         }}
       >
+        {mode === 'projet' && !initial && stockDispo.length > 0 && !source && (
+          <button type="button" className="btn large" onClick={() => setChoisirStock(true)}>
+            <Icone n="stock" petite /> Prendre dans mon stock
+          </button>
+        )}
+        {prendDuStock && (
+          <p className="message info">
+            Pris dans le stock : {qte(source!)} disponible{source!.quantite > 1 ? 's' : ''}. La quantité choisie sera retirée du stock.
+          </p>
+        )}
         <div className="segments">
           {(
             [
@@ -170,16 +301,17 @@ function FormTissu({
         </label>
         <div className="deux-colonnes">
           <label>
-            Quantité
+            {prendDuStock ? 'Quantité à prendre' : 'Quantité'}
             <input inputMode="decimal" value={quantite} onChange={(e) => setQuantite(e.target.value)} />
           </label>
           <label>
             Unité
-            <select value={t.unite} onChange={(e) => set('unite', e.target.value)}>
+            <select value={t.unite} disabled={prendDuStock} onChange={(e) => set('unite', e.target.value)}>
               <option value="m">mètres</option>
               <option value="pièce">pièce(s)</option>
               <option value="bobine">bobine(s)</option>
               <option value="paquet">paquet(s)</option>
+              <option value="pelote">pelote(s)</option>
             </select>
           </label>
         </div>
@@ -204,6 +336,29 @@ function FormTissu({
               <input value={t.composition ?? ''} placeholder="100 % lin" onChange={(e) => set('composition', e.target.value || undefined)} />
             </label>
           </div>
+        )}
+        {mode === 'stock' && (
+          <>
+            <label>
+              Origine
+              <input list="origines" value={t.origine ?? ''} placeholder="Achat, don, récupération…" onChange={(e) => set('origine', e.target.value || undefined)} />
+              <datalist id="origines">
+                {ORIGINES.map((o) => (
+                  <option key={o} value={o} />
+                ))}
+              </datalist>
+            </label>
+            <div className="deux-colonnes">
+              <label>
+                Date d’achat / d’arrivée
+                <input type="date" value={t.dateAchat ?? ''} onChange={(e) => set('dateAchat', e.target.value || undefined)} />
+              </label>
+              <label>
+                Rangement
+                <input value={t.emplacement ?? ''} placeholder="Boîte 2, armoire…" onChange={(e) => set('emplacement', e.target.value || undefined)} />
+              </label>
+            </div>
+          </>
         )}
         <label>
           Lien (boutique)
@@ -252,17 +407,19 @@ function FormTissu({
         </div>
         <label>
           Notes
-          <textarea rows={3} value={t.notes ?? ''} placeholder="Lavage, rétrécissement, sens du motif, à commander en même temps que…" onChange={(e) => set('notes', e.target.value || undefined)} />
+          <textarea rows={3} value={t.notes ?? ''} placeholder="Lavage, rétrécissement, sens du motif, idée de projet…" onChange={(e) => set('notes', e.target.value || undefined)} />
         </label>
-        <label className="bascule">
-          <input type="checkbox" checked={!!t.achete} onChange={(e) => set('achete', e.target.checked)} /> Déjà acheté
-        </label>
+        {mode === 'projet' && (
+          <label className="bascule">
+            <input type="checkbox" checked={!!t.achete} onChange={(e) => set('achete', e.target.checked)} /> Déjà acheté
+          </label>
+        )}
         <button type="submit" className="btn primaire large" disabled={!t.nom.trim()}>
-          <Icone n="check" petite /> {initial ? 'Enregistrer' : 'Ajouter au projet'}
+          <Icone n="check" petite /> {initial ? 'Enregistrer' : mode === 'stock' ? 'Ajouter au stock' : 'Ajouter au projet'}
         </button>
         {initial && (
-          <button type="button" className="btn danger lien" onClick={() => confirm(`Retirer « ${initial.nom} » ?`) && onSupprimer(initial.id)}>
-            <Icone n="poubelle" petite /> Retirer du projet
+          <button type="button" className="btn danger lien" onClick={() => (mode === 'stock' ? confirm(`Supprimer « ${initial.nom} » du stock ?`) && onSupprimer(initial) : onSupprimer(initial))}>
+            <Icone n="poubelle" petite /> {mode === 'stock' ? 'Supprimer du stock' : 'Retirer du projet'}
           </button>
         )}
       </form>

@@ -146,6 +146,16 @@ export function bilanProjet(projet: Projet, trouver: (id: string) => Patron | un
 }
 
 const sansAccents = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+/** recherche sans accents sur une liste de textes */
+export function correspond0(champs: (string | number | undefined)[], q: string): boolean {
+  if (!q.trim()) return true
+  const texte = sansAccents(champs.filter(Boolean).join(' '))
+  return sansAccents(q)
+    .split(/\s+/)
+    .filter(Boolean)
+    .every((mot) => texte.includes(mot))
+}
+
 export function correspond(p: Patron, q: string): boolean {
   if (!q.trim()) return true
   const texte = sansAccents(

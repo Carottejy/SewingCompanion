@@ -1,13 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { get, set } from 'idb-keyval'
 import catalogueEmbarque from './data/catalogue.json'
-import type { AppState, Avis, CatalogueFichier, Patron, Projet } from './types'
+import type { AppState, Avis, CatalogueFichier, Patron, Projet, Tissu } from './types'
 
 const CLE = 'sewing-companion-state-v1'
 export const URL_CATALOGUE =
   'https://raw.githubusercontent.com/Carottejy/SewingCompanion/main/src/data/catalogue.json'
 
-const VIDE: AppState = { projets: [], patronsPerso: [], favoris: [], possedes: [], avis: {} }
+const VIDE: AppState = { projets: [], patronsPerso: [], favoris: [], possedes: [], stock: [], avis: {} }
 
 interface Store {
   pret: boolean
@@ -21,6 +21,8 @@ interface Store {
   supprimerPatronPerso: (id: string) => void
   basculerFavori: (id: string) => void
   basculerPossede: (id: string) => void
+  majStock: (t: Tissu) => void
+  supprimerStock: (id: string) => void
   majAvis: (id: string, a: Avis | null) => void
   remplacerTout: (s: AppState) => void
   definirCatalogueDistant: (c: CatalogueFichier) => void
@@ -99,6 +101,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         patronsPerso: s.patronsPerso.filter((x) => x.id !== id),
         projets: s.projets.map((pr) => ({ ...pr, patrons: pr.patrons.filter((e) => e.patronId !== id) })),
       })),
+    majStock: (t) =>
+      setState((s) => {
+        const existe = s.stock.some((x) => x.id === t.id)
+        return { ...s, stock: existe ? s.stock.map((x) => (x.id === t.id ? t : x)) : [t, ...s.stock] }
+      }),
+    supprimerStock: (id) => setState((s) => ({ ...s, stock: s.stock.filter((x) => x.id !== id) })),
     basculerPossede: (id) =>
       setState((s) => ({
         ...s,

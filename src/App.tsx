@@ -10,12 +10,14 @@ import Catalogue from './views/Catalogue'
 import PatronDetail from './views/PatronDetail'
 import ProjetDetail from './views/ProjetDetail'
 import Reglages from './views/Reglages'
+import Stock from './views/Stock'
 import { PatronForm, ProjetForm } from './views/Formulaires'
 
 const ONGLETS: { id: Onglet; label: string; icone: string }[] = [
   { id: 'projets', label: 'Projets', icone: 'projets' },
   { id: 'catalogue', label: 'Catalogue', icone: 'catalogue' },
-  { id: 'mesPatrons', label: 'Mes patrons', icone: 'ciseaux' },
+  { id: 'mesPatrons', label: 'Patrons', icone: 'ciseaux' },
+  { id: 'stock', label: 'Stock', icone: 'stock' },
   { id: 'reglages', label: 'Réglages', icone: 'reglages' },
 ]
 
@@ -102,6 +104,7 @@ function Coquille() {
           {o.id === 'projets' && <Projets />}
           {o.id === 'catalogue' && <Catalogue />}
           {o.id === 'mesPatrons' && <Catalogue seulementPerso />}
+          {o.id === 'stock' && <Stock />}
           {o.id === 'reglages' && <Reglages />}
         </div>
       ))}

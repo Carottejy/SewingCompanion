@@ -86,6 +86,13 @@ export interface Tissu {
   photo?: string
   achete?: boolean
   notes?: string
+  /** stock : provenance (achat, don, récupération…) */
+  origine?: string
+  /** stock : où il est rangé */
+  emplacement?: string
+  dateAchat?: string
+  /** projet : article pris dans le stock */
+  stockId?: string
 }
 
 export interface Projet {
@@ -128,6 +135,8 @@ export interface AppState {
   favoris: string[]
   /** identifiants des patrons que je possède */
   possedes: string[]
+  /** mon stock de tissus et fournitures */
+  stock: Tissu[]
   avis: Record<string, Avis>
   catalogueDistant?: CatalogueFichier
 }
