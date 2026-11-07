@@ -401,3 +401,29 @@ input[type='range'] { width: 100%; accent-color: var(--fil); }
 .onglets button { font-size: 0.7rem; }
 .barre-recherche .champ-recherche { min-width: 0; }
 .tri-compact { flex: none; width: 112px; min-width: 0; }
+
+/* ---------- étiquettes ---------- */
+.etiquette-puce {
+  display: inline-flex; align-items: center; gap: 6px; flex: none; white-space: nowrap;
+  padding: 6px 12px; border-radius: 999px; font-size: 0.86rem; font-weight: 600;
+  border: 1.5px solid color-mix(in srgb, var(--c) 35%, transparent); background: color-mix(in srgb, var(--c) 9%, #fff); color: var(--c);
+}
+.etiquette-puce small { opacity: 0.65; font-weight: 500; }
+.etiquette-point { width: 8px; height: 8px; border-radius: 50%; background: var(--c); flex: none; }
+.etiquette-puce.active { background: var(--c); border-color: var(--c); color: #fff; }
+.etiquette-puce.active .etiquette-point { background: #fff; }
+.etiquette-puce.mini { padding: 2px 8px; font-size: 0.74rem; gap: 4px; }
+.etiquette-puce.mini .etiquette-point { width: 6px; height: 6px; }
+.etiquette-puce.choisie { padding-right: 4px; }
+.etiquette-puce.choisie button { border: none; background: color-mix(in srgb, var(--c) 18%, transparent); color: var(--c); width: 24px; height: 24px; border-radius: 50%; font-size: 1rem; line-height: 1; display: grid; place-items: center; }
+.ligne-etiquettes { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.ligne-etiquettes.compacte { margin: 4px 0 0; gap: 4px; }
+.ligne-etiquettes.suggestions { margin-top: 8px; }
+.saisie-etiquette { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+.saisie-etiquette input { flex: 1; min-width: 0; }
+.filtre-etiquettes { margin-bottom: 10px; }
+.filtre-etiquettes .puces-defilantes { margin-bottom: 4px; }
+.filtre-etiquettes-bas { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.liste-gestion { list-style: none; margin: 0; padding: 0; }
+.liste-gestion li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px dashed var(--trait); }
+.gestion-actions { display: flex; align-items: center; gap: 2px; }

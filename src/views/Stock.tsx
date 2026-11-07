@@ -5,6 +5,7 @@ import { correspond0, fmtM, formatDate } from '../lib'
 import { ouvrirLien } from '../native'
 import { coutTissu, euro, FormArticle, LigneArticle } from './Tissus'
 import type { Tissu } from '../types'
+import { aEtiquette, Etiquette, GestionEtiquettes, useEtiquettesStock } from './Etiquettes'
 
 type Filtre = 'tous' | 'tissu' | 'fourniture'
 type Tri = 'recent' | 'nom' | 'quantite'
@@ -17,6 +18,11 @@ export default function Stock() {
   const [q, setQ] = useState('')
   const [tri, setTri] = useState<Tri>('recent')
   const [epuises, setEpuises] = useState(false)
+  const [filtresEtiq, setFiltresEtiq] = useState<string[]>([])
+  const [gestion, setGestion] = useState(false)
+  const etiquettes = useEtiquettesStock()
+  // une étiquette supprimée ou renommée disparaît des filtres actifs
+  const actives = filtresEtiq.filter((f) => etiquettes.some((e) => e.nom === f))
 
   // projets qui utilisent chaque article du stock
   const utilisations = useMemo(() => {
@@ -31,12 +37,13 @@ export default function Stock() {
       (t) =>
         (filtre === 'tous' || (filtre === 'fourniture' ? t.role === 'fourniture' : t.role !== 'fourniture')) &&
         (epuises || t.quantite > 0) &&
-        correspond0([t.nom, t.composition, t.boutique, t.origine, t.emplacement, t.notes], q),
+        actives.every((f) => aEtiquette(t.etiquettes, f)) &&
+        correspond0([t.nom, t.composition, t.boutique, t.origine, t.emplacement, t.notes, ...(t.etiquettes ?? [])], q),
     )
     if (tri === 'nom') r.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
     if (tri === 'quantite') r.sort((a, b) => b.quantite - a.quantite)
     return r
-  }, [state.stock, filtre, q, tri, epuises])
+  }, [state.stock, filtre, q, tri, epuises, actives])
 
   const dispo = state.stock.filter((t) => t.quantite > 0)
   const metres = dispo.filter((t) => t.unite === 'm' && t.role !== 'fourniture').reduce((s, t) => s + t.quantite, 0)
@@ -101,6 +108,34 @@ export default function Stock() {
             ))}
           </div>
 
+          {etiquettes.length > 0 && (
+            <div className="filtre-etiquettes">
+              <div className="puces-defilantes" aria-label="Filtrer par étiquette">
+                {etiquettes.map((e) => (
+                  <Etiquette
+                    key={e.nom}
+                    nom={e.nom}
+                    compte={e.n}
+                    actif={actives.includes(e.nom)}
+                    onClick={() => setFiltresEtiq(actives.includes(e.nom) ? actives.filter((x) => x !== e.nom) : [...actives, e.nom])}
+                  />
+                ))}
+              </div>
+              <div className="filtre-etiquettes-bas">
+                {actives.length > 0 ? (
+                  <button className="btn lien petit" onClick={() => setFiltresEtiq([])}>
+                    Effacer ({actives.length})
+                  </button>
+                ) : (
+                  <small className="note-discrete">Touche une ou plusieurs étiquettes pour filtrer</small>
+                )}
+                <button className="btn lien petit" onClick={() => setGestion(true)}>
+                  Gérer les étiquettes
+                </button>
+              </div>
+            </div>
+          )}
+
           {nbEpuises > 0 && (
             <label className="bascule petite" style={{ marginBottom: 10 }}>
               <input type="checkbox" checked={epuises} onChange={(e) => setEpuises(e.target.checked)} /> Afficher les articles épuisés ({nbEpuises})
@@ -147,6 +182,8 @@ export default function Stock() {
       <button className="fab" onClick={() => setEdition('nouveau')} aria-label="Ajouter au stock">
         <Icone n="plus" />
       </button>
+
+      {gestion && <GestionEtiquettes onFermer={() => setGestion(false)} />}
 
       {edition && (
         <FormArticle

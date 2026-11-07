@@ -23,6 +23,8 @@ interface Store {
   basculerPossede: (id: string) => void
   majStock: (t: Tissu) => void
   supprimerStock: (id: string) => void
+  /** renomme une étiquette dans tout le stock (null = la supprimer) */
+  renommerEtiquette: (ancien: string, nouveau: string | null) => void
   majAvis: (id: string, a: Avis | null) => void
   remplacerTout: (s: AppState) => void
   definirCatalogueDistant: (c: CatalogueFichier) => void
@@ -105,6 +107,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setState((s) => {
         const existe = s.stock.some((x) => x.id === t.id)
         return { ...s, stock: existe ? s.stock.map((x) => (x.id === t.id ? t : x)) : [t, ...s.stock] }
+      }),
+    renommerEtiquette: (ancien, nouveau) =>
+      setState((s) => {
+        const k = ancien.toLocaleLowerCase('fr')
+        return {
+          ...s,
+          stock: s.stock.map((t) => {
+            if (!t.etiquettes?.some((e) => e.toLocaleLowerCase('fr') === k)) return t
+            const autres = t.etiquettes.filter((e) => e.toLocaleLowerCase('fr') !== k)
+            const n = nouveau && !autres.some((e) => e.toLocaleLowerCase('fr') === nouveau.toLocaleLowerCase('fr')) ? [...autres, nouveau] : autres
+            return { ...t, etiquettes: n.length ? n : undefined }
+          }),
+        }
       }),
     supprimerStock: (id) => setState((s) => ({ ...s, stock: s.stock.filter((x) => x.id !== id) })),
     basculerPossede: (id) =>

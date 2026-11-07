@@ -4,6 +4,7 @@ import { Feuille, Icone, useNav } from '../ui'
 import { compresserImage, correspond0, fmtM, plage, uid } from '../lib'
 import { ouvrirLien } from '../native'
 import type { Projet, Tissu } from '../types'
+import { ChampEtiquettes, Etiquette } from './Etiquettes'
 
 export const euro = (n: number) => n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })
 export const qte = (t: Pick<Tissu, 'unite' | 'quantite'>, q = t.quantite) =>
@@ -50,6 +51,13 @@ export function LigneArticle({
             (t.boutique || t.laize || t.composition) && (
               <small>{[t.composition, t.boutique, t.laize && `laize ${t.laize} cm`].filter(Boolean).join(' · ')}</small>
             )
+          )}
+          {t.etiquettes && t.etiquettes.length > 0 && (
+            <span className="ligne-etiquettes compacte">
+              {t.etiquettes.map((e) => (
+                <Etiquette key={e} nom={e} />
+              ))}
+            </span>
           )}
           {t.notes && <em className="tissu-notes">{t.notes}</em>}
         </span>
@@ -245,6 +253,7 @@ export function FormArticle({
       origine: undefined,
       emplacement: undefined,
       dateAchat: undefined,
+      etiquettes: undefined,
     })
     setPrix(s.prix !== undefined ? String(s.prix).replace('.', ',') : '')
     setQuantite(String(s.quantite).replace('.', ','))
@@ -305,6 +314,12 @@ export function FormArticle({
           Nom *
           <input required value={t.nom} placeholder={t.role === 'fourniture' ? 'Boutons nacre 12 mm' : 'Lin lavé terracotta'} onChange={(e) => set('nom', e.target.value)} />
         </label>
+        {mode === 'stock' && (
+          <div>
+            <span className="etiquette">Étiquettes</span>
+            <ChampEtiquettes valeur={t.etiquettes ?? []} onChange={(v) => set('etiquettes', v.length ? v : undefined)} />
+          </div>
+        )}
         <div className="deux-colonnes">
           <label>
             {prendDuStock ? 'Quantité à prendre' : 'Quantité'}

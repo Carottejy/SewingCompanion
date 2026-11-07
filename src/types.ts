@@ -91,6 +91,8 @@ export interface Tissu {
   /** stock : où il est rangé */
   emplacement?: string
   dateAchat?: string
+  /** stock : étiquettes personnalisées */
+  etiquettes?: string[]
   /** projet : article pris dans le stock */
   stockId?: string
 }
