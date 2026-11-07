@@ -6,6 +6,7 @@ import { ouvrirLien } from '../native'
 import { coutTissu, euro, FormArticle, LigneArticle } from './Tissus'
 import type { Tissu } from '../types'
 import { aEtiquette, Etiquette, GestionEtiquettes, useEtiquettesStock } from './Etiquettes'
+import { useEtatSync } from '../amis'
 
 type Filtre = 'tous' | 'tissu' | 'fourniture'
 type Tri = 'recent' | 'nom' | 'quantite'
@@ -21,6 +22,7 @@ export default function Stock() {
   const [filtresEtiq, setFiltresEtiq] = useState<string[]>([])
   const [gestion, setGestion] = useState(false)
   const etiquettes = useEtiquettesStock()
+  const { demandesRecues } = useEtatSync()
   // une étiquette supprimée ou renommée disparaît des filtres actifs
   const actives = filtresEtiq.filter((f) => etiquettes.some((e) => e.nom === f))
 
@@ -57,6 +59,12 @@ export default function Stock() {
       <Entete
         titre="Stock"
         sousTitre={state.stock.length ? `${dispo.length} article${dispo.length > 1 ? 's' : ''} disponible${dispo.length > 1 ? 's' : ''}` : 'Tissus et fournitures que tu as chez toi'}
+        actions={
+          <button className="btn petit bouton-amis" onClick={() => nav.ouvrir({ nom: 'amis' })} aria-label={`Amies${demandesRecues ? ` (${demandesRecues} demande${demandesRecues > 1 ? 's' : ''})` : ''}`}>
+            <Icone n="amis" petite /> Amies
+            {demandesRecues > 0 && <span className="compteur">{demandesRecues}</span>}
+          </button>
+        }
       />
 
       {state.stock.length === 0 ? (

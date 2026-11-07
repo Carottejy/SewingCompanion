@@ -131,6 +131,15 @@ export interface Avis {
   date: string
 }
 
+/** profil en ligne (amies et partage de stock) */
+export interface Compte {
+  secret: string
+  id: string
+  code: string
+  pseudo: string
+  partage: boolean
+}
+
 export interface AppState {
   projets: Projet[]
   patronsPerso: Patron[]
@@ -139,6 +148,7 @@ export interface AppState {
   possedes: string[]
   /** mon stock de tissus et fournitures */
   stock: Tissu[]
+  compte?: Compte
   avis: Record<string, Avis>
   catalogueDistant?: CatalogueFichier
 }

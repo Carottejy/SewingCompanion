@@ -11,6 +11,8 @@ export type Ecran =
   | { nom: 'projet'; id: string }
   | { nom: 'projetForm'; id?: string; ajouterPatron?: string }
   | { nom: 'patronForm'; id?: string }
+  | { nom: 'amis' }
+  | { nom: 'stockAmi'; id: string; pseudo: string }
 
 export interface Nav {
   onglet: Onglet
@@ -151,6 +153,7 @@ const CHEMINS: Record<string, string> = {
   check: 'M5 12l5 5 9-10',
   photo: 'M4 7h4l2-2h4l2 2h4v12H4zM12 10a3 3 0 1 0 0 6 3 3 0 0 0 0-6z',
   stock: 'M3 8l9-5 9 5v11H3zM3 8h18M8 19v-6h8v6',
+  amis: 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21v-1a6 6 0 0 1 12 0v1M16 3.5a4 4 0 0 1 0 7.5M22 21v-1a6 6 0 0 0-4-5.6',
 }
 
 export function Icone({ n, petite }: { n: string; petite?: boolean }) {

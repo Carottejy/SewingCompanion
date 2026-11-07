@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { get, set } from 'idb-keyval'
 import catalogueEmbarque from './data/catalogue.json'
-import type { AppState, Avis, CatalogueFichier, Patron, Projet, Tissu } from './types'
+import type { AppState, Avis, CatalogueFichier, Compte, Patron, Projet, Tissu } from './types'
 
 const CLE = 'sewing-companion-state-v1'
 export const URL_CATALOGUE =
@@ -22,6 +22,7 @@ interface Store {
   basculerFavori: (id: string) => void
   basculerPossede: (id: string) => void
   majStock: (t: Tissu) => void
+  definirCompte: (c: Compte | undefined) => void
   supprimerStock: (id: string) => void
   /** renomme une étiquette dans tout le stock (null = la supprimer) */
   renommerEtiquette: (ancien: string, nouveau: string | null) => void
@@ -103,6 +104,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         patronsPerso: s.patronsPerso.filter((x) => x.id !== id),
         projets: s.projets.map((pr) => ({ ...pr, patrons: pr.patrons.filter((e) => e.patronId !== id) })),
       })),
+    definirCompte: (c) => setState((s) => ({ ...s, compte: c })),
     majStock: (t) =>
       setState((s) => {
         const existe = s.stock.some((x) => x.id === t.id)

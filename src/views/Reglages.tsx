@@ -43,6 +43,7 @@ export default function Reglages() {
         favoris: d.favoris ?? [],
         possedes: d.possedes ?? [],
         stock: d.stock ?? [],
+        compte: d.compte ?? state.compte,
         avis: d.avis ?? {},
         catalogueDistant: state.catalogueDistant,
       })

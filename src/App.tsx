@@ -11,6 +11,8 @@ import PatronDetail from './views/PatronDetail'
 import ProjetDetail from './views/ProjetDetail'
 import Reglages from './views/Reglages'
 import Stock from './views/Stock'
+import Amis, { StockAmi } from './views/Amis'
+import { publierStock, rafraichirDemandes } from './amis'
 import { PatronForm, ProjetForm } from './views/Formulaires'
 
 const ONGLETS: { id: Onglet; label: string; icone: string }[] = [
@@ -22,7 +24,7 @@ const ONGLETS: { id: Onglet; label: string; icone: string }[] = [
 ]
 
 function Coquille() {
-  const { pret } = useStore()
+  const { pret, state } = useStore()
   const [onglet, setOnglet] = useState<Onglet>('projets')
   const [pile, setPile] = useState<Ecran[]>([])
   const [toast, setToast] = useState<string>()
@@ -60,6 +62,28 @@ function Coquille() {
       }
     },
   }
+
+  // partage du stock : publication 3 s après la dernière modification
+  const compte = state.compte
+  const premierPassage = useRef(true)
+  useEffect(() => {
+    if (!pret || !compte) return
+    // au lancement on republie aussi, pour rattraper une modification faite hors ligne
+    const t = setTimeout(() => publierStock(compte, state.stock), premierPassage.current ? 1500 : 3000)
+    premierPassage.current = false
+    return () => clearTimeout(t)
+  }, [pret, compte, state.stock])
+
+  // demandes d'amies reçues : au lancement et au retour dans l'app
+  useEffect(() => {
+    if (!pret || !compte) return
+    rafraichirDemandes(compte)
+    if (!estNatif()) return
+    const h = CapApp.addListener('resume', () => rafraichirDemandes(compte))
+    return () => {
+      h.then((x) => x.remove())
+    }
+  }, [pret, compte])
 
   // vérification silencieuse au lancement et au retour dans l'app
   useEffect(() => {
@@ -114,6 +138,8 @@ function Coquille() {
           {e.nom === 'projet' && <ProjetDetail id={e.id} />}
           {e.nom === 'projetForm' && <ProjetForm id={e.id} ajouterPatron={e.ajouterPatron} />}
           {e.nom === 'patronForm' && <PatronForm id={e.id} />}
+          {e.nom === 'amis' && <Amis />}
+          {e.nom === 'stockAmi' && <StockAmi id={e.id} pseudo={e.pseudo} />}
         </div>
       ))}
       <nav className="onglets" aria-label="Navigation principale">
